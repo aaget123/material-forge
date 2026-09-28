@@ -1,0 +1,7 @@
+# 文本文件统一按 LF 入库（Windows 检出时自动还原）
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.mp4 binary
+*.wav binary

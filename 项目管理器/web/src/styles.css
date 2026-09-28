@@ -1,0 +1,1016 @@
+/* ==========================================================================
+   设计令牌：移植自参考设计（Next + Tailwind v4 原型的 globals.css）
+   颜色全部为 oklch，保持原值；透明度用 color-mix 复现 Tailwind 的 /60 之类写法。
+   ========================================================================== */
+:root {
+  --background: oklch(0.985 0.003 85);
+  --foreground: oklch(0.2 0.01 60);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.01 60);
+  --primary: oklch(0.24 0.01 60);
+  --primary-foreground: oklch(0.985 0.003 85);
+  --secondary: oklch(0.96 0.004 85);
+  --secondary-foreground: oklch(0.24 0.01 60);
+  --muted: oklch(0.96 0.004 85);
+  --muted-foreground: oklch(0.55 0.01 60);
+  --accent: oklch(0.95 0.005 85);
+  --accent-foreground: oklch(0.24 0.01 60);
+  --destructive: oklch(0.577 0.2 27);
+  --border: oklch(0.92 0.005 85);
+  --input: oklch(0.92 0.005 85);
+  --ring: oklch(0.7 0.01 60);
+  --success: oklch(0.6 0.1 155);
+  --project-1: oklch(0.62 0.1 250);
+  --project-2: oklch(0.7 0.11 70);
+  --project-3: oklch(0.62 0.1 155);
+  --project-4: oklch(0.6 0.12 20);
+  --sidebar: oklch(0.975 0.004 85);
+  --sidebar-accent: oklch(0.95 0.005 85);
+
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+
+  --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Cascadia Mono', Consolas, 'SFMono-Regular', ui-monospace, monospace;
+  --font-serif: 'Songti SC', 'SimSun', Georgia, serif;
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+/* 页面永不滚动：只允许指定容器（画廊、详情栏、专注模式）内部滚动。
+   早先 body 会跟着详情栏内容一起变高，于是"页面滚动条 + 详情栏滚动条"同时出现（实测：body 1108 > 视口 900）。*/
+html, body, #root { height: 100%; margin: 0; overflow: hidden; }
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 通用小工具（替代 Tailwind 的原子类） */
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabular { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.serif { font-family: var(--font-serif); }
+.muted { color: var(--muted-foreground); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.line-clamp-2, .line-clamp-5 {
+  display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
+}
+.line-clamp-2 { -webkit-line-clamp: 2; }
+.line-clamp-5 { -webkit-line-clamp: 5; }
+
+/* ==========================================================================
+   按钮 / 输入 / 标签
+   ========================================================================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid transparent; border-radius: var(--radius-lg);
+  font: inherit; font-size: 14px; font-weight: 500; white-space: nowrap;
+  padding: 0 14px; height: 36px; cursor: pointer;
+  background: var(--card); color: var(--foreground);
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
+}
+.btn svg { pointer-events: none; }
+.btn:disabled { opacity: .5; pointer-events: none; }
+.btn:focus-visible { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 45%, transparent); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn--default { background: var(--primary); color: var(--primary-foreground); }
+.btn--default:hover:not(:disabled) { background: color-mix(in oklab, var(--primary) 88%, var(--background)); }
+.btn--outline { border-color: var(--border); background: var(--background); }
+.btn--outline:hover:not(:disabled) { background: var(--muted); }
+.btn--ghost { background: transparent; }
+.btn--ghost:hover:not(:disabled) { background: var(--muted); }
+.btn--destructive { background: color-mix(in oklab, var(--destructive) 12%, var(--card)); color: var(--destructive); }
+.btn--destructive:hover:not(:disabled) { background: color-mix(in oklab, var(--destructive) 20%, var(--card)); }
+.btn--sm { height: 28px; font-size: 13px; padding: 0 10px; border-radius: var(--radius-md); }
+.btn--icon { width: 32px; height: 32px; padding: 0; border-radius: var(--radius-md); }
+.btn--icon-sm { width: 26px; height: 26px; padding: 0; border-radius: var(--radius-sm); }
+
+/* 图标按钮：详情栏的一排动作、顶栏的面板开关都用它。
+   尺寸比 .btn--icon 略小，点击区 30px，够手指点。 */
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0; flex-shrink: 0;
+  border: 1px solid transparent; border-radius: var(--radius-md);
+  background: transparent; color: var(--muted-foreground); cursor: pointer;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.icon-btn:hover:not(:disabled) { background: var(--muted); color: var(--foreground); }
+.icon-btn:disabled { opacity: .45; pointer-events: none; }
+.icon-btn:focus-visible { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 45%, transparent); }
+.icon-btn--danger:hover:not(:disabled) { background: color-mix(in oklab, var(--destructive) 12%, transparent); color: var(--destructive); }
+.icon-btn--armed {
+  width: auto; padding: 0 8px; gap: 5px; font: inherit; font-size: 12px;
+  background: color-mix(in oklab, var(--destructive) 14%, var(--card)); color: var(--destructive);
+  border-color: color-mix(in oklab, var(--destructive) 35%, transparent);
+}
+
+/* ==========================================================================
+   纯 CSS 图标（见 components/Icon.tsx）
+   结构固定为：.pmi（外层，只管尺寸，尺寸由 inline style 给）
+             └ .pmi-b（内层，inset: 0 铺满，承担全部几何）
+                └ ::before / ::after（与外层同一坐标系：百分比都相对外层盒子）
+   为什么分层：第一版把形状画在外层，被 inline 的 width/height 覆盖，桶身直接撑出盒子
+   （实测踩到）。分层后坐标一律是"外层盒子的百分比"，父级给任何 size 都不变形。
+   --pmi-bg 给需要遮住后层线条的图标（复制、面板）。
+   ========================================================================== */
+.pmi { position: relative; display: inline-block; flex-shrink: 0; --pmi-bg: var(--card); }
+.pmi-b { position: absolute; inset: 0; display: block; }
+.pmi-b::before, .pmi-b::after { content: ''; position: absolute; box-sizing: border-box; }
+
+/* 复制路径：两张错开的圆角纸 */
+.pmi--copy .pmi-b {
+  left: 4%; top: 4%; right: auto; bottom: auto; width: 60%; height: 60%;
+  border: 1.5px solid currentColor; border-radius: 16%;
+}
+.pmi--copy .pmi-b::before {
+  left: 47%; top: 47%; width: 100%; height: 100%;
+  border: 1.5px solid currentColor; border-radius: 16%; background: var(--pmi-bg);
+}
+
+/* 移入回收站：桶身 + 桶盖 + 提手（盖与提手用 50% + translateX 居中） */
+.pmi--trash .pmi-b {
+  left: 22%; top: 40%; right: auto; bottom: auto; width: 56%; height: 54%;
+  border: 1.5px solid currentColor; border-top: 0; border-radius: 0 0 26% 26%;
+}
+.pmi--trash .pmi-b::before {
+  left: 50%; top: 38%; width: 72%; height: 0;
+  border-top: 1.5px solid currentColor; transform: translateX(-50%);
+}
+.pmi--trash .pmi-b::after {
+  left: 50%; top: 29%; width: 22%; height: 9%;
+  border: 1.5px solid currentColor; border-bottom: 0; border-radius: 40% 40% 0 0;
+  transform: translateX(-50%);
+}
+
+/* 从回收站恢复：缺口圆环 + 缺口处的折角箭头 */
+.pmi--restore .pmi-b {
+  left: 16%; top: 22%; right: auto; bottom: auto; width: 68%; height: 68%;
+  border: 1.5px solid currentColor; border-radius: 50%; border-top-color: transparent;
+  transform: rotate(-30deg);
+}
+.pmi--restore .pmi-b::before {
+  left: 50%; top: 12%; width: 20%; height: 20%;
+  border-left: 1.5px solid currentColor; border-top: 1.5px solid currentColor;
+  transform: translateX(-50%) rotate(-45deg);
+}
+
+/* 交给系统默认程序：缺右上角的框 + 射出去的箭头 */
+.pmi--external .pmi-b {
+  left: 6%; bottom: 6%; right: auto; top: auto; width: 52%; height: 52%;
+  border: 1.5px solid currentColor; border-radius: 18%;
+  border-top-color: transparent; border-right-color: transparent;
+}
+.pmi--external .pmi-b::before {
+  left: 34%; top: 64%; width: 56%; height: 1.5px; background: currentColor;
+  transform: rotate(-45deg); transform-origin: left center;
+}
+.pmi--external .pmi-b::after {
+  right: 2%; top: 2%; width: 32%; height: 32%;
+  border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor;
+}
+
+/* 专注模式：四个角的取景框（8 层渐变画 4 个 L） */
+.pmi--focus .pmi-b {
+  background-image:
+    linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 34% 1.5px, 1.5px 34%, 34% 1.5px, 1.5px 34%, 34% 1.5px, 1.5px 34%, 34% 1.5px, 1.5px 34%;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+}
+
+/* 编辑：笔杆（斜 45°）+ 左下角的笔尖（clip-path 画三角形，跟着尺寸缩放） */
+.pmi--edit .pmi-b {
+  left: 19%; top: 42%; right: auto; bottom: auto; width: 62%; height: 16%;
+  border: 1.5px solid currentColor; border-radius: 30% / 60%;
+  transform: rotate(-45deg);
+}
+.pmi--edit .pmi-b::before {
+  left: 21%; top: 65%; width: 15%; height: 20%;
+  background: currentColor; clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  transform: rotate(45deg);
+}
+
+/* 关闭：两根交叉的线 */
+.pmi--close .pmi-b::before, .pmi--close .pmi-b::after {
+  left: 8%; top: 50%; width: 84%; height: 1.5px; background: currentColor;
+}
+.pmi--close .pmi-b::before { transform: rotate(45deg); }
+.pmi--close .pmi-b::after { transform: rotate(-45deg); }
+
+/* 面板开关：方框 + 左侧/右侧的实心条（条=面板里有内容，收起时画成空心） */
+.pmi--panel-left .pmi-b, .pmi--panel-right .pmi-b {
+  left: 8%; top: 17%; right: auto; bottom: auto; width: 84%; height: 66%;
+  border: 1.5px solid currentColor; border-radius: 16%;
+}
+.pmi--panel-left .pmi-b::before, .pmi--panel-right .pmi-b::before {
+  top: 0; bottom: 0; width: 30%; background: currentColor;
+}
+.pmi--panel-left .pmi-b::before { left: 0; border-radius: 12% 0 0 12%; }
+.pmi--panel-right .pmi-b::before { right: 0; border-radius: 0 12% 12% 0; }
+.icon-btn[aria-pressed='false'] .pmi--panel-left .pmi-b::before,
+.icon-btn[aria-pressed='false'] .pmi--panel-right .pmi-b::before { background: transparent; }
+
+/* 文件夹：带标签页的轮廓（浏览模式用） */
+.pmi--folder .pmi-b {
+  left: 4%; top: 22%; right: auto; bottom: auto; width: 92%; height: 60%;
+  border: 1.5px solid currentColor; border-radius: 12%;
+}
+.pmi--folder .pmi-b::before {
+  left: -1.5px; top: -34%; width: 44%; height: 34%;
+  border: 1.5px solid currentColor; border-bottom: 0; border-radius: 30% 30% 0 0;
+}
+
+.input, .textarea, .select {
+  font: inherit; color: var(--foreground); background: transparent;
+  border: 1px solid var(--input); border-radius: var(--radius-lg);
+  width: 100%; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.input { height: 32px; padding: 4px 10px; font-size: 14px; }
+.textarea { min-height: 64px; padding: 8px 10px; font-size: 14px; resize: vertical; }
+.select { height: 36px; padding: 0 10px; background: var(--card); }
+.input:focus, .textarea:focus, .select:focus { border-color: var(--ring); }
+.input::placeholder, .textarea::placeholder { color: var(--muted-foreground); }
+.label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; line-height: 1; }
+
+/* ==========================================================================
+   外壳：侧栏 + 主区 + 详情栏
+   ========================================================================== */
+/* 外壳固定成一屏高、自己裁掉溢出的内容：不然详情栏内容一变长就把整页撑高（两个滚动条的根因） */
+.app { display: flex; height: 100dvh; min-height: 0; overflow: hidden; background: var(--background); }
+
+
+.sidebar {
+  width: 256px; flex-shrink: 0; display: flex; flex-direction: column;
+  padding: 24px 16px; background: var(--sidebar); border-right: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; }
+.brand-mark {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: var(--radius-md);
+  background: var(--primary); color: var(--primary-foreground);
+  font-size: 14px; font-weight: 600;
+}
+.brand-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+
+.side-nav { display: flex; flex-direction: column; gap: 2px; margin-top: 32px; }
+.side-group-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 32px; padding-left: 8px; padding-right: 4px;
+  font-size: 12px; font-weight: 500; color: var(--muted-foreground);
+}
+.side-list { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; list-style: none; padding: 0; }
+.side-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 6px 8px; border: 0; border-radius: var(--radius-md);
+  background: transparent; color: var(--muted-foreground);
+  font: inherit; font-size: 14px; text-align: left; cursor: pointer;
+  transition: background-color .15s, color .15s;
+}
+.side-item:hover { background: color-mix(in oklab, var(--sidebar-accent) 60%, transparent); color: var(--foreground); }
+.side-item.is-active { background: var(--sidebar-accent); color: var(--foreground); font-weight: 500; }
+.side-item:disabled { pointer-events: none; opacity: .6; }
+.side-item-icon { display: flex; align-items: center; justify-content: center; width: 16px; position: relative; }
+.side-item-label { flex: 1; min-width: 0; }
+.side-rename-input {
+  flex: 1; min-width: 0; height: 22px; padding: 0 4px; font: inherit; font-size: 13px;
+  border: 1px solid var(--ring); border-radius: var(--radius-sm); background: var(--card); color: var(--foreground);
+}
+.side-item-count { font-size: 12px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.project-dot { width: 6px; height: 6px; border-radius: 999px; flex-shrink: 0; }
+.dot-project-1 { background: var(--project-1); }
+.dot-project-2 { background: var(--project-2); }
+.dot-project-3 { background: var(--project-3); }
+.dot-project-4 { background: var(--project-4); }
+.side-item-icon .project-dot {
+  position: absolute; right: -2px; bottom: -2px;
+  box-shadow: 0 0 0 2px var(--sidebar);
+}
+
+/* 侧栏里的项目树：一行 = 折叠箭头 + 项目按钮 + 悬停才出现的两个操作。
+   操作按钮留在文档流里（不是浮层），这样悬停时不会因为出现/消失而抖动布局。*/
+.side-row { display: flex; align-items: center; gap: 2px; border-radius: var(--radius-md); }
+.side-item--tree { flex: 1; min-width: 0; }
+.side-twisty {
+  display: flex; align-items: center; justify-content: center;
+  width: 14px; height: 22px; flex-shrink: 0; padding: 0;
+  border: 0; background: transparent; color: var(--muted-foreground);
+  cursor: pointer; border-radius: var(--radius-sm);
+}
+.side-twisty:hover { color: var(--foreground); background: var(--sidebar-accent); }
+.side-twisty--empty { pointer-events: none; }
+.side-row-actions { display: flex; align-items: center; gap: 0; flex-shrink: 0; opacity: 0; transition: opacity .12s; }
+.side-row:hover .side-row-actions,
+.side-row:focus-within .side-row-actions { opacity: 1; }
+.side-action { width: 22px; height: 22px; padding: 0; border-radius: var(--radius-sm); }
+.side-row-actions .side-action--danger:hover { color: var(--destructive); }
+
+.side-footer {
+  margin-top: auto; display: flex; align-items: center; gap: 12px;
+  padding: 16px 8px 0; border-top: 1px solid var(--border);
+}
+.avatar {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 999px;
+  background: var(--accent); font-size: 12px; font-weight: 500; flex-shrink: 0;
+}
+.side-footer-text { min-width: 0; flex: 1; }
+.side-footer-text p { margin: 0; }
+.side-footer-name { font-size: 14px; font-weight: 500; }
+.side-footer-sub { font-size: 12px; color: var(--muted-foreground); }
+
+.main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.main-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.main-inner {
+  /* 铺满可用宽度但有上限；左对齐而不是居中——居中时侧栏开合会改变可用宽度，
+     内容随之"重新居中"而视觉上向右跳（用户反馈）。 */
+  flex: 1; min-height: 0; width: 100%; max-width: 1560px; margin: 0; padding: 14px 24px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* ==========================================================================
+   顶栏
+   ========================================================================== */
+.page-header { display: flex; flex-direction: column; gap: 12px; }
+/* 允许换行：窄窗口时把操作条整体落到第二行，而不是把标题挤成一条竖排 */
+.page-header-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.page-header-row > div:first-child { flex: 1 1 220px; min-width: 0; }
+/* 面板开关 + 标题：开关跟着标题的首行居中对齐，不跟着 flex-end 沉到底部 */
+.page-header-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.page-header-left .page-title { min-width: 0; }
+.page-title {
+  margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.025em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.page-actions { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.search-box { position: relative; width: 260px; }
+.search-box svg { position: absolute; top: 50%; left: 12px; transform: translateY(-50%); color: var(--muted-foreground); pointer-events: none; }
+.search-box input {
+  width: 100%; height: 36px; padding: 0 12px 0 36px; font: inherit; font-size: 14px;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--card); color: var(--foreground); outline: none; transition: border-color .15s;
+}
+.search-box input::placeholder { color: var(--muted-foreground); }
+.search-box input:focus { border-color: var(--ring); }
+
+.view-toggle { display: flex; gap: 0; padding: 2px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); flex-shrink: 0; }
+.view-toggle button {
+  display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; white-space: nowrap;
+  border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer;
+  font: inherit; font-size: 14px; color: var(--muted-foreground); transition: background-color .15s, color .15s;
+}
+.view-toggle button:hover { color: var(--foreground); }
+.view-toggle button.is-active { background: var(--accent); color: var(--foreground); font-weight: 500; }
+
+/* 类型筛选药丸 */
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 3px 9px;
+  border: 1px solid var(--border); border-radius: 999px; background: var(--card);
+  font: inherit; font-size: 12px; line-height: 18px; color: var(--muted-foreground); cursor: pointer;
+}
+.chip:hover { color: var(--foreground); }
+.chip.is-active { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+.chip-count { opacity: .6; font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   画廊卡片 / 列表
+   ========================================================================== */
+.grid-area { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.grid-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; position: relative; scrollbar-gutter: stable; }
+.grid-inner { position: relative; width: 100%; }
+
+.card-slot { position: absolute; }
+.card {
+  display: flex; flex-direction: column; overflow: hidden;
+  width: 100%; height: 100%;
+  border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--card);
+  cursor: pointer; transition: box-shadow .15s, border-color .15s;
+}
+.card:hover { box-shadow: 0 6px 16px color-mix(in oklab, var(--foreground) 10%, transparent); }
+.card.is-selected { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.card-preview {
+  position: relative; width: 100%; overflow: hidden;
+  background: var(--muted); border-bottom: 1px solid var(--border);
+}
+.card-preview img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s; }
+/* 卡片右下角的删除：默认淡出、悬停才显形，免得一屏都是垃圾桶 */
+.card-trash {
+  position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 999px; cursor: pointer;
+  background: color-mix(in oklab, var(--card) 90%, transparent); color: var(--muted-foreground);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 8%, transparent);
+  opacity: 0; transition: opacity .15s, background-color .15s, color .15s;
+}
+.card:hover .card-trash, .card-trash:focus-visible { opacity: 1; }
+.card-trash:hover { background: var(--card); color: var(--destructive); }
+.card-trash.is-armed { opacity: 1; background: var(--destructive); color: #fff; }
+/* 来源路径后面那个内联小图标：只占一行文字的高度，不把那一行撑高 */
+.icon-btn--inline { width: 20px; height: 20px; margin-left: 4px; vertical-align: -4px; }
+.path-with-copy { display: inline-flex; align-items: baseline; gap: 2px; word-break: break-all; }
+
+/* 「打开方式」选择器：与全站同一套边框/选中态，不弹系统对话框 */
+.openwith-list { display: flex; flex-direction: column; gap: 6px; max-height: 46vh; overflow-y: auto; }
+.openwith-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--background);
+  font: inherit; text-align: left; cursor: pointer; color: var(--foreground);
+  transition: background-color .15s, border-color .15s;
+}
+.openwith-row:hover { background: var(--muted); }
+.openwith-row.is-active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.openwith-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; flex-shrink: 0; border-radius: var(--radius-md);
+  background: var(--accent); color: var(--muted-foreground);
+}
+.openwith-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.openwith-label { font-size: 13px; }
+.openwith-path { font-size: 11px; color: var(--muted-foreground); }
+/* 回收站卡片右上角的勾选框（纯 CSS 画的，不引图标） */.card-check {
+  position: absolute; right: 8px; top: 8px; width: 22px; height: 22px; padding: 0;
+  border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent); border-radius: 6px;
+  background: color-mix(in oklab, var(--card) 92%, transparent); cursor: pointer;
+  transition: background-color .15s, border-color .15s;
+}.card-check:hover { border-color: var(--primary); }.card-check.is-checked { background: var(--primary); border-color: var(--primary); }.card-check.is-checked::after {
+  content: ''; position: absolute; left: 7px; top: 3px; width: 6px; height: 11px;
+  border: solid var(--primary-foreground); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}.card.is-checked { box-shadow: 0 0 0 1px var(--primary); }
+
+/* 来源筛选（AI 生成 / 非 AI / 其他 / 未标注） */
+.filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.origin-filter { display: inline-flex; gap: 4px; }
+.origin-filter button {
+  padding: 3px 9px; border: 1px solid var(--border); border-radius: 999px; background: var(--card);
+  font: inherit; font-size: 12px; line-height: 18px; color: var(--muted-foreground); cursor: pointer;
+}
+.origin-filter button.is-active { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+/* 激活态统一：只变颜色，字号/内边距/圆角一律与未激活相同（用户反馈"有大有小"） */
+.modality-picker button.is-active { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); font-weight: inherit; }
+/* 提示词那一栏占两行：标签在上、文本域在下，免得把详情栏挤窄 */
+.meta-prompt { align-items: flex-start; }
+.meta-prompt textarea { width: 100%; resize: vertical; min-height: 56px; }
+
+/* 画廊的文件夹范围提示条 */.scope-chip {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border: 1px dashed var(--border); border-radius: var(--radius-lg); background: var(--card); font-size: 12px;
+}.scope-chip-path { font-family: var(--font-mono); color: var(--muted-foreground); }
+
+/* 未入库文件卡：虚线边 + 角标 + 右下角一键导入 */
+.card.is-unimported { border-style: dashed; }
+.card.is-unimported .card-preview { background: color-mix(in oklab, var(--muted) 55%, transparent); }
+.card-badge {
+  position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 500;
+  background: color-mix(in oklab, var(--card) 92%, transparent); color: var(--muted-foreground);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+.card-badge--unimported { color: var(--muted-foreground); }
+.card-import {
+  position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--primary); color: var(--primary-foreground);
+  box-shadow: 0 2px 6px color-mix(in oklab, var(--foreground) 20%, transparent);
+}
+.card-import:hover { filter: brightness(1.05); }
+/* 没有缩略图时的占位（未入库文件 / 不支持的格式） */
+.file-placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 90%; }
+.file-placeholder-ext {
+  font-size: 12px; font-weight: 600; letter-spacing: .04em; padding: 3px 10px;
+  border-radius: var(--radius-md); background: var(--card); color: var(--muted-foreground);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+.file-placeholder-name { font-size: 12px; color: var(--muted-foreground); max-width: 100%; }
+
+/* 回收站里的恢复按钮：同样是悬停显形，但悬停色用主色而不是危险色 */
+.card-trash.is-restore:hover { color: var(--primary); }
+
+/* 回收站卡片左下角的「彻底删除」：默认淡出、悬停显形，确认态变红底 */
+.card-purge {
+  position: absolute; left: 8px; bottom: 8px; width: 28px; height: 28px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 999px; cursor: pointer;
+  background: color-mix(in oklab, var(--card) 90%, transparent); color: var(--muted-foreground);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 8%, transparent);
+  opacity: 0; transition: opacity .15s, background-color .15s, color .15s;
+}
+.card:hover .card-purge, .card-purge:focus-visible { opacity: 1; }
+.card-purge:hover { color: var(--destructive); }
+.card-purge.is-armed { opacity: 1; background: var(--destructive); color: #fff; }
+
+/* 磁盘文件查看/编辑浮层（文件浏览里点文件打开） */
+.fviewer {
+  position: fixed; inset: 4vh 6vw; z-index: 60; display: flex; flex-direction: column;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: 0 18px 48px color-mix(in oklab, var(--foreground) 22%, transparent);
+  overflow: hidden;
+}
+.fviewer-head {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+.fviewer-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; max-width: 46vw; }
+.fviewer-meta { font-size: 11px; color: var(--muted-foreground); }
+.fviewer-body { flex: 1; min-height: 0; overflow: auto; }
+.fviewer-body .cm-editor { height: 100%; }
+.fviewer-body .cm-scroller { font-family: var(--font-mono); font-size: 12.5px; }
+.fviewer-note { padding: 14px 16px; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+
+/* 组（bundle）角标：贴在卡片左上角，显示"一组 N 件"，点一下展开/收起 */
+.card-bundle {
+  position: absolute; left: 8px; top: 8px; display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border: 0; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 11px; font-weight: 500;
+  background: color-mix(in oklab, var(--card) 92%, transparent); color: var(--foreground);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 12%, transparent);
+  transition: background-color .15s, color .15s;
+}
+.card-bundle:hover { background: var(--primary); color: var(--primary-foreground); }
+.card-bundle.is-open { background: var(--accent); color: var(--muted-foreground); }
+.card:hover .card-preview img { transform: scale(1.03); }
+.card-preview-center {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; color: var(--muted-foreground);
+}
+.card-preview-code, .card-preview-text { padding: 16px; width: 100%; height: 100%; overflow: hidden; margin: 0; }
+.card-preview-code { font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--muted-foreground); white-space: pre-wrap; word-break: break-all; }
+.card-preview-text { font-family: var(--font-serif); font-size: 14px; line-height: 1.7; white-space: pre-line; color: color-mix(in oklab, var(--foreground) 80%, transparent); }
+.card-play {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+}
+.card-play span {
+  display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+  border-radius: 999px; background: color-mix(in oklab, var(--background) 80%, transparent);
+  color: var(--foreground); backdrop-filter: blur(4px);
+}
+.card-duration {
+  position: absolute; right: 8px; bottom: 8px; padding: 2px 6px; border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--background) 80%, transparent);
+  font-size: 11px; font-variant-numeric: tabular-nums; backdrop-filter: blur(4px);
+}
+.card-body { display: flex; flex-direction: column; gap: 8px; padding: 14px; }
+.card-title { margin: 0; font-size: 14px; font-weight: 500; }
+.card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-date { flex-shrink: 0; font-size: 12px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.card-project { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-foreground); min-width: 0; }
+
+/* 模态徽章 */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  padding: 2px 6px; border-radius: var(--radius-md);
+  background: var(--accent); font-size: 12px; color: color-mix(in oklab, var(--foreground) 80%, transparent);
+}
+.badge-sep { color: color-mix(in oklab, var(--muted-foreground) 60%, transparent); }
+.badge-model { color: var(--muted-foreground); min-width: 0; }
+
+/* 列表视图 */
+.content-list {
+  list-style: none; margin: 0; padding: 0; overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--card);
+}
+.content-list li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; }
+.content-list li + li { border-top: 1px solid var(--border); }
+.content-list li:hover { background: color-mix(in oklab, var(--accent) 50%, transparent); }
+.content-list li.is-selected { background: var(--accent); }
+.list-icon {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: var(--radius-md);
+  background: var(--accent); color: var(--muted-foreground);
+}
+.list-main { min-width: 0; flex: 1; }
+.list-main p { margin: 0; }
+.list-title { font-size: 14px; }
+.list-excerpt { font-size: 12px; color: var(--muted-foreground); }
+.list-badge { display: none; width: 160px; }
+.list-project { display: none; width: 112px; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-foreground); }
+.list-tail { width: 56px; text-align: right; font-size: 12px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 80px 0; border: 1px dashed var(--border); border-radius: var(--radius-xl); text-align: center;
+}
+.empty-state p { margin: 0; font-size: 14px; }
+.empty-hint { padding: 64px 0; border: 1px dashed var(--border); border-radius: var(--radius-xl); text-align: center; font-size: 14px; color: var(--muted-foreground); }
+
+/* ==========================================================================
+   详情栏（参考设计里没有，是本工具自己的检查器）
+   ========================================================================== */
+.inspector {
+  width: 380px; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto;
+  background: var(--card); border-left: 1px solid var(--border);
+}
+.inspector-head {
+  position: sticky; top: 0; z-index: 3; background: var(--background);
+  display: flex; align-items: flex-start; gap: 8px; padding: 16px; border-bottom: 1px solid var(--border);
+}
+.inspector-head .icon-btn { position: relative; z-index: 4; }
+.inspector { scrollbar-gutter: stable; }
+.inspector-head .inspector-head-text { flex: 1; min-width: 0; }
+.inspector-head h2 { margin: 0 0 6px; font-size: 15px; font-weight: 600; word-break: break-all; }
+.inspector-head .path { font-size: 12px; color: var(--muted-foreground); word-break: break-all; }
+.inspector-head .icon-btn { margin: -4px -4px 0 0; }
+.inspector .empty { padding: 24px 16px; font-size: 13px; line-height: 1.8; color: var(--muted-foreground); }
+.inspector .empty p { margin: 0 0 12px; }
+.inspector .empty strong { color: var(--foreground); }
+/* 预览区：高度固定且不参与 flex 收缩。
+   之前它是可收缩的 flex 子项，内容超高时被压缩到 264px，而里面的 img 仍保持 320px，
+   又因为 overflow:visible，图片上下各溢出 28px 盖住了标题区和第一行元数据（实测踩到）。*/
+.preview {
+  position: relative; flex: 0 0 auto; height: clamp(200px, 30vh, 320px); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--muted); border-bottom: 1px solid var(--border);
+}
+.preview img, .preview video { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+.preview img { cursor: zoom-in; }
+.preview audio { width: 92%; margin: 0; }
+.preview pre {
+  margin: 0; padding: 12px; width: 100%; max-height: 100%; overflow: auto;
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+}
+.preview .no-preview { padding: 40px 16px; font-size: 13px; text-align: center; color: var(--muted-foreground); }
+/* 看图模式没有单独的按钮入口：点图就进（需求如此），所以整块预览区都要给出可点的暗示 */
+.preview--clickable { cursor: zoom-in; }
+.trash-banner {
+  padding: 8px 16px; font-size: 12px; border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--project-2) 12%, var(--card));
+}
+.meta-table { padding: 12px 16px; font-size: 12px; }
+.meta-table > div { display: flex; gap: 10px; padding: 4px 0; border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent); }
+.meta-table > div:last-child { border-bottom: 0; }
+.meta-table span:first-child { width: 72px; flex-shrink: 0; color: var(--muted-foreground); }
+.meta-table span:last-child { word-break: break-all; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.actions-sep { width: 1px; height: 20px; margin: 0 6px; background: var(--border); }
+
+/* ==========================================================================
+   对话框
+   ========================================================================== */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: color-mix(in oklab, var(--foreground) 10%, transparent);
+  backdrop-filter: blur(4px); animation: overlay-in .15s ease-out;
+}
+.dialog {
+  width: 100%; max-width: 32rem; max-height: 90dvh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 16px; padding: 16px;
+  background: var(--card); border-radius: var(--radius-xl);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent), 0 16px 40px color-mix(in oklab, var(--foreground) 16%, transparent);
+  animation: dialog-in .16s ease-out;
+}
+.dialog--sm { max-width: 28rem; }
+.dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.dialog-title { margin: 0; font-size: 16px; font-weight: 500; line-height: 1.2; }
+.dialog-desc { margin: 4px 0 0; font-size: 14px; color: var(--muted-foreground); }
+.dialog-body { display: flex; flex-direction: column; gap: 16px; }
+.dialog-foot {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin: 0 -16px -16px; padding: 16px; border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--muted) 50%, transparent);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-label { display: flex; gap: 8px; font-size: 14px; font-weight: 500; }
+
+.dropzone {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 32px 16px; border: 1px dashed var(--border); border-radius: var(--radius-lg);
+  background: transparent; cursor: pointer; transition: border-color .15s, background-color .15s;
+}
+.dropzone:hover, .dropzone.is-over { border-color: var(--ring); background: color-mix(in oklab, var(--muted) 40%, transparent); }
+.dropzone svg { color: var(--muted-foreground); }
+.dropzone-title { font-size: 14px; }
+.dropzone-hint { font-size: 12px; color: var(--muted-foreground); }
+.file-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  border-radius: var(--radius-lg); background: color-mix(in oklab, var(--muted) 50%, transparent);
+}
+.file-thumb { width: 48px; height: 48px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0; }
+.file-ext {
+  display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;
+  border-radius: var(--radius-md); background: var(--accent); font-size: 11px; color: var(--muted-foreground);
+  flex-shrink: 0; text-transform: uppercase;
+}
+.file-name { font-size: 14px; }
+.file-sub { font-size: 12px; color: var(--muted-foreground); }
+/* 每件文件的自动归类结果：类型是按后缀判定的，必须让用户看得见 */
+.file-type {
+  flex-shrink: 0; padding: 2px 8px; border-radius: 999px;
+  background: var(--accent); font-size: 11px; color: var(--muted-foreground);
+}
+.field-hint { margin: 6px 0 0; font-size: 12px; line-height: 1.5; color: var(--muted-foreground); }
+.dialog-text { font-size: 14px; line-height: 1.6; }
+.dialog-text p { margin: 0 0 8px; }
+.dialog-text p:last-child { margin-bottom: 0; }
+.dialog-text ul { margin: 0; padding-left: 18px; }
+
+.modality-picker { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.modality-picker button {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
+  border: 1px solid var(--border); border-radius: 999px; background: var(--card);
+  font: inherit; font-size: 12px; line-height: 18px; color: var(--muted-foreground); cursor: pointer;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.modality-picker button:hover { color: var(--foreground); }
+.modality-picker button.is-active { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+.color-picker { display: flex; gap: 10px; }
+.color-picker button {
+  width: 24px; height: 24px; border-radius: 999px; border: 0; cursor: pointer; padding: 0;
+  opacity: .7; transition: opacity .15s, box-shadow .15s;
+}
+.color-picker button:hover { opacity: 1; }
+.color-picker button.is-active { opacity: 1; box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--foreground); }
+
+/* 提示条 */
+.notice { padding: 8px 16px; font-size: 12px; border-bottom: 1px solid var(--border); }
+.notice-error { background: color-mix(in oklab, var(--destructive) 12%, var(--card)); color: var(--destructive); }
+.notice-ok { background: color-mix(in oklab, var(--project-2) 14%, var(--card)); }
+.progress { height: 4px; flex: 1; border-radius: 999px; background: var(--muted); overflow: hidden; }
+.progress > i { display: block; height: 100%; background: var(--primary); transition: width .2s; }
+.status-bar {
+  display: flex; align-items: center; gap: 12px; padding: 8px 32px;
+  font-size: 12px; color: var(--muted-foreground); border-bottom: 1px solid var(--border);
+}
+.status-bar .spacer { margin-left: auto; }
+
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* ==========================================================================
+   看图模式
+   ========================================================================== */
+.viewer { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--background); }
+.viewer-bar {
+  display: flex; align-items: center; gap: 12px; padding: 8px 16px;
+  background: var(--card); border-bottom: 1px solid var(--border);
+}
+.viewer-title { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.viewer-title strong { font-size: 13px; font-weight: 600; }
+.viewer-path { font-size: 11px; color: var(--muted-foreground); max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viewer-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.viewer-counter, .viewer-zoom { font-size: 12px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; min-width: 46px; text-align: center; }
+.viewer-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+.viewer-stage {
+  flex: 1; min-height: 0; position: relative; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; cursor: grab; touch-action: none; outline: none; background: var(--muted);
+}
+.viewer-stage.dragging { cursor: grabbing; }
+.viewer-stage img { max-width: none; max-height: none; user-select: none; transform-origin: center center; will-change: transform; -webkit-user-drag: none; }
+.viewer-error { font-size: 13px; color: var(--destructive); }
+.viewer-hint {
+  display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+  padding: 6px 16px; background: var(--card); border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted-foreground);
+}
+.viewer-dim { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   专注模式（所有模态共用的外壳；图片仍走上面的看图器）
+   外壳刻意与看图器同一套视觉：同高工具栏、同一条底部提示，
+   这样从图切到音频不会有"换了个软件"的割裂感。
+   ========================================================================== */
+.focus { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--background); }
+.focus-bar {
+  display: flex; align-items: center; gap: 12px; padding: 8px 16px;
+  background: var(--card); border-bottom: 1px solid var(--border);
+}
+.focus-title { min-width: 0; display: flex; align-items: center; gap: 8px; }
+.focus-title strong { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.focus-path { font-size: 11px; color: var(--muted-foreground); max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.focus-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.focus-tools > button {
+  min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid var(--border);
+  border-radius: var(--radius-md); background: var(--background); color: var(--foreground);
+  font: inherit; font-size: 13px; cursor: pointer;
+}
+.focus-tools > button:hover:not(:disabled) { background: var(--muted); }
+.focus-tools > button:disabled { opacity: .4; pointer-events: none; }
+.focus-counter { font-size: 12px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; min-width: 46px; text-align: center; }
+.focus-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+.focus-close { background: var(--primary) !important; color: var(--primary-foreground) !important; border-color: transparent !important; }
+.focus-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 24px; }
+.focus-todo { text-align: center; font-size: 14px; line-height: 1.9; }
+.focus-todo p { margin: 0 0 8px; }
+.focus-hint {
+  display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+  padding: 6px 16px; background: var(--card); border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted-foreground);
+}
+
+/* 波形播放器 */
+.wave { width: min(1100px, 100%); display: flex; flex-direction: column; gap: 14px; }
+.wave-stage {
+  position: relative; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 12px;
+}
+.wave-canvas { display: block; width: 100%; height: min(38vh, 260px); cursor: pointer; touch-action: none; }
+.wave-hint {
+  position: absolute; inset: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--muted-foreground);
+}
+.wave-transport { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wave-play {
+  width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 999px;
+  background: var(--primary); color: var(--primary-foreground); font-size: 13px; cursor: pointer;
+}
+.wave-play:hover { background: color-mix(in oklab, var(--primary) 88%, var(--background)); }
+.wave-time { font-size: 12px; min-width: 110px; }
+.wave-seek { flex: 1; min-width: 160px; }
+.wave-field { display: flex; align-items: center; gap: 6px; }
+.wave-field input[type='range'] { width: 90px; }
+.wave-note { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
+/* 回收站里的"可整项目恢复"区块 */
+.trash-projects {
+  display: flex; flex-direction: column; gap: 6px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card);
+}
+.trash-projects-title { margin: 0 0 2px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); }
+.trash-project { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+
+.wave-note kbd {
+  font-family: var(--font-mono); font-size: 11px; padding: 1px 4px;
+  border: 1px solid var(--border); border-radius: 4px; background: var(--card);
+}
+
+/* 视频专注模式：能放大的播放器（缩放靠 transform，不重新编码） */
+.vstage { width: min(1200px, 100%); display: flex; flex-direction: column; gap: 12px; }
+.vstage-stage {
+  position: relative; flex: 1; min-height: 0; height: min(62vh, 620px);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: #000; border-radius: var(--radius-xl); cursor: grab; touch-action: none;
+}
+.vstage-stage.dragging { cursor: grabbing; }
+.vstage-video { display: block; transform-origin: center center; will-change: transform; }
+.vstage-error {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; color: #fff; font-size: 13px; text-align: center; padding: 24px;
+}
+.vstage-transport { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.vstage-btn {
+  height: 28px; min-width: 30px; padding: 0 8px; border: 1px solid var(--border);
+  border-radius: var(--radius-md); background: var(--background); color: var(--foreground);
+  font: inherit; font-size: 12px; cursor: pointer;
+}
+.vstage-btn:hover { background: var(--muted); }
+.vstage-btn.is-active { background: var(--primary); color: var(--primary-foreground); border-color: transparent; }
+
+/* 文本/代码专注模式：CodeMirror 编辑器 */
+.editor { width: min(1200px, 100%); height: 100%; display: flex; flex-direction: column; gap: 10px; }
+.editor-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px; }
+.editor-file { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--muted-foreground); }
+.editor-dirty { color: var(--destructive); }
+.editor-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.editor-host {
+  flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--card);
+}
+.editor-loading { display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--muted-foreground); min-height: 200px; }
+/* CodeMirror 撑满容器，并把默认字号调成与全站一致 */
+.editor-host .cm-editor { height: 100%; font-size: 13px; }
+.editor-host .cm-scroller { font-family: var(--font-mono); line-height: 1.65; }
+.editor-host .cm-editor.cm-focused { outline: none; }
+.editor-host .cm-gutters { background: color-mix(in oklab, var(--muted) 45%, var(--card)); border-right: 1px solid var(--border); }
+
+/* 综合/其他类型的专注模式：文件检视 */
+.mixed { width: min(1100px, 100%); height: 100%; display: flex; flex-direction: column; gap: 16px; }
+.mixed-pdf { width: 100%; height: 100%; min-height: 60vh; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); }
+.mixed-meta {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 24px;
+  padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card);
+}
+.mixed-meta > div { display: flex; gap: 10px; padding: 4px 0; font-size: 12px; border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent); }
+.mixed-meta span:first-child { width: 76px; flex-shrink: 0; color: var(--muted-foreground); }
+.mixed-meta span:last-child { word-break: break-all; }
+.mixed-block {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card);
+}
+.mixed-block h3 { margin: 0; font-size: 13px; font-weight: 600; }
+.mixed-block p { margin: 0; font-size: 12px; }
+.mixed-hex, .mixed-text {
+  margin: 0; flex: 1; min-height: 0; overflow: auto; padding: 12px;
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.5; white-space: pre;
+  background: color-mix(in oklab, var(--muted) 40%, var(--card)); border-radius: var(--radius-md);
+}
+.mixed-text { white-space: pre-wrap; word-break: break-word; }
+
+/* ==========================================================================
+   文件浏览模式（Miller 列 + 详情表）
+   ========================================================================== */
+.browse { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.browse-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.browse-root { display: flex; align-items: center; gap: 6px; }
+.browse-crumbs { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; min-width: 0; font-size: 12px; }
+.browse-crumbs button {
+  border: 0; background: transparent; color: var(--muted-foreground); cursor: pointer;
+  font: inherit; font-size: 12px; padding: 2px 4px; border-radius: var(--radius-sm); max-width: 200px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.browse-crumbs button:hover { background: var(--muted); color: var(--foreground); }
+.browse-crumbs button.is-current { color: var(--foreground); font-weight: 600; }
+.browse-crumb-sep { color: var(--muted-foreground); }
+.browse-spacer { flex: 1; min-width: 8px; }
+
+.browse-actions {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card);
+}
+.browse-selected { font-size: 12px; min-width: 0; }
+.browse-flag {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  background: var(--accent); color: var(--muted-foreground);
+}
+.browse-flag.is-in-library { background: color-mix(in oklab, var(--project-2) 22%, var(--card)); color: var(--foreground); }
+
+.browse-columns {
+  flex: 1; min-height: 0; display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); padding: 8px;
+}
+.browse-column {
+  flex: 0 0 224px; min-height: 0; display: flex; flex-direction: column;
+  border-right: 1px solid var(--border);
+}
+.browse-column:last-child { border-right: 0; }
+/* 详情列要吃掉剩余宽度：4 列（名称/日期/类型/大小）挤在 300px 里会每格都换行 */
+.browse-column.is-detail { flex: 1 1 720px; min-width: 460px; }
+.browse-column-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 0 8px 6px; font-size: 12px; border-bottom: 1px solid var(--border);
+}
+.browse-column-head strong { font-weight: 600; }
+.browse-list { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 0; }
+.browse-empty { padding: 8px; font-size: 12px; }
+.browse-row {
+  display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer;
+  font-size: 12px; border-radius: var(--radius-sm);
+}
+.browse-row:hover { background: var(--muted); }
+.browse-row.is-selected { background: var(--accent); }
+.browse-row.is-ignored { opacity: .62; }
+.browse-row.is-ignored .browse-name { font-style: italic; }
+.browse-icon { display: flex; align-items: center; color: var(--muted-foreground); flex-shrink: 0; }
+.browse-name { flex: 1; min-width: 0; }
+.browse-size { flex-shrink: 0; }
+.browse-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--border); }
+.browse-badge {
+  flex-shrink: 0; font-size: 10px; padding: 1px 6px; border-radius: 999px;
+  background: var(--accent); color: var(--muted-foreground);
+}
+.browse-badge.is-in-library { background: color-mix(in oklab, var(--project-2) 26%, var(--card)); color: var(--foreground); }
+.browse-cell { flex-shrink: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 表头与详情行用同一套列宽，否则"大小"会跑到"类型"头上 */
+.browse-table-head {
+  display: grid; gap: 0; padding-left: 8px;
+  grid-template-columns: 16px minmax(0, 2.2fr) minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, .7fr);
+  border-bottom: 1px solid var(--border);
+}
+.browse-table-head button {
+  border: 0; background: transparent; color: var(--muted-foreground); cursor: pointer;
+  font: inherit; font-size: 11px; text-align: left; padding: 4px 0;
+}
+.browse-table-head button:nth-child(1) { grid-column: 2; }
+.browse-table-head button:hover { color: var(--foreground); }
+.browse-table-head::before { content: ''; }
+/* 详情模式：图标 + 名称 + 日期 + 类型 + 大小，与表头一一对应 */
+.browse-column.is-detail .browse-row {
+  display: grid; align-items: center; gap: 0;
+  grid-template-columns: 16px minmax(0, 2.2fr) minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, .7fr);
+}
+.browse-column.is-detail .browse-row .browse-name { grid-column: 2; }
+.browse-note { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
+
+/* 响应式：窄屏收起侧栏与列表列 */
+@media (min-width: 1024px) {
+  .list-badge { display: flex; }
+}
+@media (min-width: 640px) {
+  .list-project { display: flex; }
+}
+@media (max-width: 1500px) {
+  .inspector { width: 340px; }
+}
+@media (max-width: 1100px) {
+  .inspector { width: 300px; }
+}
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main-inner { padding: 16px; }
+}

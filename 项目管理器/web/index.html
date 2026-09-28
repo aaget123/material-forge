@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 服务端在返回该页面时会把占位符替换成本次会话的 token（见 server/server.ts） -->
+    <meta name="pm-token" content="__PM_TOKEN__" />
+    <title>个人项目管理器 · M0</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

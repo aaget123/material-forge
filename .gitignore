@@ -1,0 +1,28 @@
+# 依赖与缓存
+node_modules/
+.cache/
+dist/
+.venv/
+venv/
+__pycache__/
+
+# 构建与运行产物
+*.log
+*.tmp
+项目管理器/.tmp/
+
+# 编辑器与系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 凭据与本地配置（不入库）
+.env
+*.key
+# 素材库（应用数据，约 400MB，不入库）
+素材库/
+
+# 界面截图属个人素材，不入仓库
+项目管理器/docs/screenshots/
