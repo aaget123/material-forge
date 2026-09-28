@@ -40,5 +40,10 @@
     "codemirror": "^6.0.2",
     "lucide-react": "^1.48.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "author": "aaget123 与 DSH (DeepSeek Harness)",
+  "contributors": [
+    "aaget123",
+    "DSH (DeepSeek Harness)"
+  ]
 }
